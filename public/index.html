@@ -1,0 +1,703 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Business Website Chatbot</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: #f5f6fa;
+            min-height: 100vh;
+            margin: 0;
+            display: flex;
+            flex-direction: column;
+        }
+        
+        .top-bar {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 15px 20px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        
+        .top-bar-content {
+            max-width: 1200px;
+            margin: 0 auto;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 20px;
+        }
+        
+        .app-title {
+            font-size: 1.5rem;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .scraping-controls {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+        
+        .scraping-controls input, .scraping-controls select {
+            padding: 8px 12px;
+            border: none;
+            border-radius: 5px;
+            font-size: 0.9rem;
+        }
+        
+        .scraping-controls input {
+            width: 250px;
+        }
+        
+        .scraping-controls button {
+            background: rgba(255,255,255,0.2);
+            color: white;
+            border: 1px solid rgba(255,255,255,0.3);
+            padding: 8px 16px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 0.9rem;
+            transition: background-color 0.3s;
+        }
+        
+        .scraping-controls button:hover {
+            background: rgba(255,255,255,0.3);
+        }
+        
+        .scraping-controls button:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+        }
+        
+        .main-container {
+            flex: 1;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+            width: 100%;
+        }
+        
+        .chat-container {
+            background: white;
+            border-radius: 15px;
+            box-shadow: 0 5px 20px rgba(0,0,0,0.1);
+            height: calc(100vh - 120px);
+            display: flex;
+            flex-direction: column;
+        }
+        
+        .chat-header {
+            padding: 20px 25px 15px;
+            border-bottom: 1px solid #e9ecef;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border-radius: 15px 15px 0 0;
+        }
+        
+        .chat-title {
+            font-size: 1.3rem;
+            font-weight: 600;
+            margin: 0;
+        }
+        
+        .chat-subtitle {
+            font-size: 0.9rem;
+            opacity: 0.9;
+            margin-top: 5px;
+        }
+        
+        .chat-messages {
+            flex: 1;
+            overflow-y: auto;
+            padding: 20px;
+            background: #f8f9fa;
+        }
+        
+        .chat-input-area {
+            padding: 20px;
+            border-top: 1px solid #e9ecef;
+            background: white;
+            border-radius: 0 0 15px 15px;
+        }
+        
+        .input-group {
+            display: flex;
+            gap: 10px;
+            align-items: flex-end;
+        }
+        
+        .input-group textarea {
+            flex: 1;
+            padding: 12px;
+            border: 2px solid #e9ecef;
+            border-radius: 8px;
+            font-size: 1rem;
+            resize: none;
+            min-height: 50px;
+            max-height: 120px;
+            transition: border-color 0.3s;
+        }
+        
+        .input-group textarea:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+        
+        .send-button {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            padding: 12px 20px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 1rem;
+            transition: transform 0.2s;
+            height: 50px;
+        }
+        
+        .send-button:hover:not(:disabled) {
+            transform: translateY(-2px);
+        }
+        
+        .send-button:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+            transform: none;
+        }
+        
+        .status-indicator {
+            position: fixed;
+            top: 70px;
+            right: 20px;
+            padding: 8px 12px;
+            border-radius: 5px;
+            font-size: 0.9rem;
+            font-weight: 500;
+            z-index: 1000;
+            transition: all 0.3s ease;
+        }
+        
+        .status-indicator.success {
+            background: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+        
+        .status-indicator.error {
+            background: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+        }
+        
+        .status-indicator.info {
+            background: #d1ecf1;
+            color: #0c5460;
+            border: 1px solid #bee5eb;
+        }
+        
+        .message {
+            margin-bottom: 15px;
+            padding: 15px;
+            border-radius: 15px;
+            max-width: 85%;
+            word-wrap: break-word;
+            line-height: 1.4;
+        }
+        
+        .message.user {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            margin-left: auto;
+            border-radius: 15px 5px 15px 15px;
+        }
+        
+        .message.bot {
+            background: white;
+            color: #333;
+            border: 1px solid #e9ecef;
+            border-radius: 5px 15px 15px 15px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+        }
+        
+        .suggestions {
+            padding: 15px 20px;
+            background: white;
+            border-top: 1px solid #e9ecef;
+        }
+        
+        .suggestions h3 {
+            margin: 0 0 10px 0;
+            font-size: 0.9rem;
+            color: #666;
+        }
+        
+        .suggestion-buttons {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+        }
+        
+        .suggestion-btn {
+            background: #f8f9fa;
+            color: #667eea;
+            border: 1px solid #e9ecef;
+            padding: 6px 12px;
+            border-radius: 20px;
+            font-size: 0.85rem;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            transform: scale(1);
+        }
+        
+        .suggestion-btn:hover {
+            background: #667eea;
+            color: white;
+            transform: translateY(-1px);
+            box-shadow: 0 2px 8px rgba(102, 126, 234, 0.3);
+        }
+        
+        .suggestions {
+            opacity: 0;
+            transform: translateY(10px);
+            transition: all 0.3s ease;
+        }
+        
+        .suggestions.show {
+            opacity: 1;
+            transform: translateY(0);
+        }
+        
+        .welcome-message {
+            text-align: center;
+            color: #666;
+            font-style: italic;
+            margin-top: 50px;
+        }
+        
+        .typing-indicator {
+            display: flex;
+            align-items: center;
+            padding: 15px;
+            margin-bottom: 15px;
+            max-width: 85%;
+            background: white;
+            border: 1px solid #e9ecef;
+            border-radius: 5px 15px 15px 15px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+        }
+        
+        .typing-indicator .typing-dots {
+            display: flex;
+            gap: 4px;
+            align-items: center;
+        }
+        
+        .typing-indicator .typing-dots::before {
+            content: '🤖 ';
+            margin-right: 8px;
+        }
+        
+        .typing-dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background: #667eea;
+            animation: typing 1.4s infinite ease-in-out both;
+        }
+        
+        .typing-dot:nth-child(1) { animation-delay: -0.32s; }
+        .typing-dot:nth-child(2) { animation-delay: -0.16s; }
+        .typing-dot:nth-child(3) { animation-delay: 0s; }
+        
+        @keyframes typing {
+            0%, 80%, 100% {
+                transform: scale(0.8);
+                opacity: 0.5;
+            }
+            40% {
+                transform: scale(1.2);
+                opacity: 1;
+            }
+        }
+        
+        .message {
+            opacity: 0;
+            transform: translateY(10px);
+            animation: fadeInUp 0.3s ease forwards;
+        }
+        
+        @keyframes fadeInUp {
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+        
+        .loading {
+            display: inline-block;
+            width: 20px;
+            height: 20px;
+            border: 3px solid #f3f3f3;
+            border-top: 3px solid #667eea;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin-right: 10px;
+        }
+        
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        
+        @media (max-width: 768px) {
+            .top-bar-content {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 10px;
+            }
+            
+            .scraping-controls {
+                flex-wrap: wrap;
+                width: 100%;
+            }
+            
+            .scraping-controls input {
+                width: 200px;
+                min-width: 150px;
+            }
+            
+            .chat-container {
+                height: calc(100vh - 160px);
+            }
+            
+            .message {
+                max-width: 95%;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Top bar with scraping controls -->
+    <div class="top-bar">
+        <div class="top-bar-content">
+            <div class="app-title">
+                🤖 Business Website Chatbot
+            </div>
+            <div class="scraping-controls">
+                <input type="url" id="websiteUrl" placeholder="Enter website URL (e.g., https://example.com)" required>
+                <select id="maxPages">
+                    <option value="5">5 pages</option>
+                    <option value="10" selected>10 pages</option>
+                    <option value="15">15 pages</option>
+                    <option value="20">20 pages</option>
+                </select>
+                <button id="scrapeBtn" onclick="scrapeWebsite()">
+                    <span id="scrapeBtnText">🚀 Scrape</span>
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Status indicator -->
+    <div id="statusIndicator" class="status-indicator" style="display: none;"></div>
+
+    <!-- Main chat interface -->
+    <div class="main-container">
+        <div class="chat-container">
+            <div class="chat-header">
+                <div class="chat-title">💬 AI Assistant</div>
+                <div class="chat-subtitle" id="chatSubtitle">First, scrape a website to get started</div>
+            </div>
+            
+            <div class="chat-messages" id="chatMessages">
+                <div class="welcome-message">
+                    <p>👋 Welcome! Enter a website URL above and click "Scrape" to begin.</p>
+                    <p>I'll analyze the website content and answer questions about it.</p>
+                </div>
+            </div>
+            
+            <div class="suggestions" id="suggestions" style="display: none;">
+                <h3>💡 Suggested questions:</h3>
+                <div class="suggestion-buttons" id="suggestionButtons"></div>
+            </div>
+            
+            <div class="chat-input-area">
+                <div class="input-group">
+                    <textarea id="question" placeholder="Ask me anything about the scraped website..." rows="1" disabled></textarea>
+                    <button id="chatBtn" class="send-button" onclick="askQuestion()" disabled>
+                        <span id="chatBtnText">Send</span>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let isScraping = false;
+        let isChatting = false;
+
+        async function scrapeWebsite() {
+            const websiteUrl = document.getElementById('websiteUrl').value.trim();
+            const maxPages = parseInt(document.getElementById('maxPages').value);
+            
+            if (!websiteUrl) {
+                showStatusIndicator('Please enter a website URL', 'error');
+                return;
+            }
+            
+            isScraping = true;
+            updateScrapeButton();
+            clearChat();
+            
+            try {
+                showStatusIndicator('Scraping website... This may take a few minutes.', 'info');
+                
+                const response = await fetch('/scrape', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ websiteUrl, maxPages })
+                });
+                
+                const result = await response.json();
+                
+                if (result.success) {
+                    showStatusIndicator(result.message, 'success');
+                    document.getElementById('question').disabled = false;
+                    document.getElementById('chatBtn').disabled = false;
+                    document.getElementById('chatSubtitle').textContent = `Ready to answer questions about ${new URL(websiteUrl).hostname}`;
+                    loadSuggestions();
+                    addWelcomeMessage(websiteUrl);
+                } else {
+                    showStatusIndicator(`Error: ${result.error}`, 'error');
+                }
+                
+            } catch (error) {
+                showStatusIndicator(`Error: ${error.message}`, 'error');
+            } finally {
+                isScraping = false;
+                updateScrapeButton();
+            }
+        }
+
+        async function askQuestion() {
+            const question = document.getElementById('question').value.trim();
+            
+            if (!question) {
+                return;
+            }
+            
+            isChatting = true;
+            updateChatButton();
+            
+            // Add user message
+            addMessage(question, 'user');
+            document.getElementById('question').value = '';
+            
+            // Show typing indicator
+            const typingIndicator = showTypingIndicator();
+            
+            try {
+                const response = await fetch('/chat', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ question })
+                });
+                
+                const result = await response.json();
+                
+                // Remove typing indicator
+                removeTypingIndicator(typingIndicator);
+                
+                if (result.success) {
+                    addMessageWithTypewriter(result.response, 'bot');
+                } else {
+                    addMessageWithTypewriter(`Error: ${result.error}`, 'bot');
+                }
+                
+            } catch (error) {
+                // Remove typing indicator
+                removeTypingIndicator(typingIndicator);
+                addMessageWithTypewriter(`Error: ${error.message}`, 'bot');
+            } finally {
+                isChatting = false;
+                updateChatButton();
+            }
+        }
+
+        async function loadSuggestions() {
+            try {
+                const response = await fetch('/suggestions');
+                const result = await response.json();
+                
+                if (result.success && result.data.length > 0) {
+                    const suggestionsDiv = document.getElementById('suggestions');
+                    const buttonsDiv = document.getElementById('suggestionButtons');
+                    
+                    buttonsDiv.innerHTML = '';
+                    result.data.slice(0, 6).forEach(suggestion => {
+                        const btn = document.createElement('button');
+                        btn.className = 'suggestion-btn';
+                        btn.textContent = suggestion;
+                        btn.onclick = () => {
+                            // Add a subtle animation when clicking suggestion
+                            btn.style.transform = 'scale(0.95)';
+                            setTimeout(() => {
+                                btn.style.transform = 'scale(1)';
+                                document.getElementById('question').value = suggestion;
+                                askQuestion();
+                            }, 100);
+                        };
+                        buttonsDiv.appendChild(btn);
+                    });
+                    
+                    suggestionsDiv.style.display = 'block';
+                    setTimeout(() => {
+                        suggestionsDiv.classList.add('show');
+                    }, 50);
+                }
+            } catch (error) {
+                console.error('Error loading suggestions:', error);
+            }
+        }
+
+        function addMessage(content, type) {
+            const messagesDiv = document.getElementById('chatMessages');
+            const messageDiv = document.createElement('div');
+            messageDiv.className = `message ${type}`;
+            messageDiv.textContent = content;
+            messagesDiv.appendChild(messageDiv);
+            messagesDiv.scrollTop = messagesDiv.scrollHeight;
+        }
+        
+        function showTypingIndicator() {
+            const messagesDiv = document.getElementById('chatMessages');
+            const typingDiv = document.createElement('div');
+            typingDiv.className = 'typing-indicator';
+            typingDiv.innerHTML = `
+                <div class="typing-dots">
+                    <div class="typing-dot"></div>
+                    <div class="typing-dot"></div>
+                    <div class="typing-dot"></div>
+                </div>
+            `;
+            messagesDiv.appendChild(typingDiv);
+            messagesDiv.scrollTop = messagesDiv.scrollHeight;
+            return typingDiv;
+        }
+        
+        function removeTypingIndicator(typingIndicator) {
+            if (typingIndicator && typingIndicator.parentNode) {
+                typingIndicator.parentNode.removeChild(typingIndicator);
+            }
+        }
+        
+        function addMessageWithTypewriter(content, type) {
+            const messagesDiv = document.getElementById('chatMessages');
+            const messageDiv = document.createElement('div');
+            messageDiv.className = `message ${type}`;
+            messagesDiv.appendChild(messageDiv);
+            
+            // Typewriter effect
+            let index = 0;
+            const speed = 30; // milliseconds per character
+            
+            function typeWriter() {
+                if (index < content.length) {
+                    messageDiv.textContent += content.charAt(index);
+                    index++;
+                    messagesDiv.scrollTop = messagesDiv.scrollHeight;
+                    setTimeout(typeWriter, speed);
+                }
+            }
+            
+            // Start typing effect after a brief delay
+            setTimeout(typeWriter, 100);
+        }
+
+        function showStatusIndicator(message, type) {
+            const element = document.getElementById('statusIndicator');
+            element.textContent = message;
+            element.className = `status-indicator ${type}`;
+            element.style.display = 'block';
+            
+            // Auto-hide success messages after 3 seconds
+            if (type === 'success') {
+                setTimeout(() => {
+                    element.style.display = 'none';
+                }, 3000);
+            }
+        }
+        
+        function clearChat() {
+            const messagesDiv = document.getElementById('chatMessages');
+            messagesDiv.innerHTML = '';
+            const suggestionsDiv = document.getElementById('suggestions');
+            suggestionsDiv.classList.remove('show');
+            suggestionsDiv.style.display = 'none';
+        }
+        
+        function addWelcomeMessage(websiteUrl) {
+            const hostname = new URL(websiteUrl).hostname;
+            addMessageWithTypewriter(`✅ Successfully analyzed ${hostname}! You can now ask me questions about their business, products, services, contact information, and more.`, 'bot');
+        }
+
+        function updateScrapeButton() {
+            const btn = document.getElementById('scrapeBtn');
+            const btnText = document.getElementById('scrapeBtnText');
+            
+            if (isScraping) {
+                btn.disabled = true;
+                btnText.innerHTML = '<span class="loading"></span>Scraping...';
+            } else {
+                btn.disabled = false;
+                btnText.textContent = '🚀 Scrape Website';
+            }
+        }
+
+        function updateChatButton() {
+            const btn = document.getElementById('chatBtn');
+            const btnText = document.getElementById('chatBtnText');
+            
+            if (isChatting) {
+                btn.disabled = true;
+                btnText.innerHTML = '<span class="loading"></span>Thinking...';
+            } else {
+                btn.disabled = false;
+                btnText.textContent = 'Send Question';
+            }
+        }
+
+        // Enter key support for chat
+        document.getElementById('question').addEventListener('keypress', function(e) {
+            if (e.key === 'Enter' && !e.shiftKey) {
+                e.preventDefault();
+                if (!this.disabled) {
+                    askQuestion();
+                }
+            }
+        });
+        
+        // Auto-resize textarea
+        document.getElementById('question').addEventListener('input', function() {
+            this.style.height = 'auto';
+            this.style.height = Math.min(this.scrollHeight, 120) + 'px';
+        });
+    </script>
+</body>
+</html>

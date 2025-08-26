@@ -1,0 +1,6 @@
+# Minimal requirements for the chatbot
+streamlit
+requests
+beautifulsoup4
+openai
+python-dotenv
